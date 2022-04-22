@@ -7,7 +7,7 @@
             <div class="rounded overflow-hidden shadow lg bg-white mb-6">
                 <div class="px-6 py-4">
                     <h1>Crear usuario</h1>
-                    <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data" class="dropzone">
                         @csrf
 
                         <div class="mb-4">

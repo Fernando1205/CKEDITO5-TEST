@@ -26,6 +26,12 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     forceTLS: true
 // });
+
+// Alpine
 import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 Alpine.start();
+
+// DROPZONE
+import Dropzone from "Dropzone";
+window.Dropzone = Dropzone;
