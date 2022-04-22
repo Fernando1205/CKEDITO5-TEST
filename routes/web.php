@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,3 +18,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::resource('posts', PostController::class);
 Route::post('image/upload', [ ImageController::class, 'upload'])->name('image.upload');
+
+Route::resource('users', UserController::class);
