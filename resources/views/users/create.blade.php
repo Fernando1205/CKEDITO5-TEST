@@ -7,7 +7,7 @@
     <div class="rounded overflow-hidden shadow lg bg-white mb-6">
         <div class="px-6 py-4">
             <h1>Crear usuario</h1>
-            <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data" id="formSubmit">
                 @csrf
 
                 <div class="mb-4">
@@ -16,8 +16,12 @@
                     </label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="name" type="text" placeholder="Nombre..." name="name"
+                    id="name" type="text" placeholder="Nombre..." name="name" required
                     >
+                    @error('name')
+                        <p class="text-red-400" id="errorname">{{ $message }}</p>
+                    @enderror
+                    <p class="text-red-400" id="errorname" style="display: none"></p>
                 </div>
 
                 <div class="mb-4">
@@ -26,8 +30,12 @@
                     </label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="email" type="email" placeholder="Email..." name="email"
+                    id="email" type="email" placeholder="Email..." name="email" required
                     >
+                    @error('email')
+                        <p class="text-red-400" id="erroremail">{{ $message }}</p>
+                    @enderror
+                    <p class="text-red-400" id="erroremail" style="display: none"></p>
                 </div>
 
                 <div class="mb-4 dropzone-cus" id="myDropzone">
@@ -44,7 +52,9 @@
                     <button class="dz-remove" data-dz-remove type="button" id="deleteImg">X</button>
                 </div>
 
-
+                @error('avatar')
+                    <p class="text-red-400">{{ $message }}</p>
+                @enderror
 
                 <input type="submit" value="Guardar" id="submit"
                     class="bg-green-500 text-white hover:bg-green-700 font-bold py-2 px-4 rounded">
@@ -60,11 +70,14 @@
 @push('script')
 <script>
     const defaultText = document.querySelectorAll('.dz-default');
+    const _csrf = document.querySelector('meta[name="csrf-token"').content;
+    const form = document.querySelector('#formSubmit');
+
     let myDropzone = new Dropzone("div#myDropzone", {
         // The configuration we've talked about above
-        url: "/",
+        url: "{{ route('users.store') }}",
         autoProcessQueue: false,
-        uploadMultiple: false,
+        uploadMultiple: true,
         addRemoveLinks: true,
         createImageThumbnails: true,
         maxFiles: 1,
@@ -80,25 +93,43 @@
             // First change the button to actually tell Dropzone to process the queue.
             document.getElementById("submit").addEventListener("click", function(e) {
                 // Make sure that the form isn't actually being sent.
-                e.preventDefault();
-                e.stopPropagation();
-                myDropzone.processQueue();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    myDropzone.processQueue();
+
             });
 
             // Listen to the sendingmultiple event. In this case, it's the sendingmultiple event instead
             // of the sending event because uploadMultiple is set to true.
-            this.on("sendingmultiple", function() {
+            this.on("sendingmultiple", function(file, xhr, formData) {
             // Gets triggered when the form is actually being sent.
             // Hide the success button or the complete form.
-            console.log('enviando');
+                let  name = document.querySelector('#name').value;
+                let  email = document.querySelector('#email').value;
+
+                formData.append('_token', "{{ csrf_token() }}");
+                formData.append('name', name);
+                formData.append('email', email);
+                formData.append('avatar', file);
             });
             this.on("successmultiple", function(files, response) {
             // Gets triggered when the files have successfully been sent.
             // Redirect user or notify of success.
+                window.location.href = '/users';
             });
             this.on("errormultiple", function(files, response) {
             // Gets triggered when there was an error sending the files.
             // Maybe show form again, and notify user of error
+                let errors = response.errors;
+
+                Object.entries(errors).forEach( (value,key) => {
+
+                    document.querySelector('#error'+value[0]).innerHTML = value[1];
+                    document.querySelector('#error'+value[0]).style.display = 'block';
+
+                })
+
+                myDropzone.removeAllFiles(true);
             });
 
             this.on("addedfile", file => {
@@ -128,6 +159,7 @@
     document.querySelector('#deleteImg').addEventListener('click', () => {
         myDropzone.removeAllFiles(true);
     })
+
 </script>
 @endpush
 @push('css')
@@ -197,6 +229,9 @@
         .dz-remove:hover {
             background-color: red;
             width: 35px;
+        }
+        .dz-error-message{
+            display: none;
         }
     </style>
 @endpush

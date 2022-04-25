@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,9 +36,23 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
-        dd($request->all());
+        try {
+            if($request->hasFile('file')){
+                $file = $request->file('file');
+                $path = $file[0]->storeAs('',$file[0]->hashName());
+            }
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'avatar' => $path ?? ''
+            ]);
+
+            return response()->json(['message' => 'Guarado con exito'],200);
+        } catch (\Throwable $th) {
+            dd($th->getMessage());
+        }
     }
 
     /**
